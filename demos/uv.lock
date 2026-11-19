@@ -384,6 +384,7 @@ name = "devfest-agents-evolution-demos"
 version = "1.0.0"
 source = { virtual = "." }
 dependencies = [
+    { name = "google-genai" },
     { name = "numpy", version = "2.4.6", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.12'" },
     { name = "numpy", version = "2.5.5", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.12'" },
     { name = "python-dotenv" },
@@ -404,6 +405,7 @@ requires-dist = [
     { name = "google-antigravity", marker = "extra == 'live-gcp'", specifier = ">=0.1.0" },
     { name = "google-auth", marker = "extra == 'live-gcp'", specifier = ">=2.35.0" },
     { name = "google-cloud-discoveryengine", marker = "extra == 'live-gcp'", specifier = ">=0.13.0" },
+    { name = "google-genai", specifier = ">=1.0.0" },
     { name = "google-genai", marker = "extra == 'live-gcp'", specifier = ">=1.0.0" },
     { name = "numpy", specifier = ">=2.0.0" },
     { name = "python-dotenv", specifier = ">=1.0.1" },

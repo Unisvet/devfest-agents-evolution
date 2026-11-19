@@ -21,9 +21,20 @@ Demonstrates:
 from __future__ import annotations
 
 import json
+import sys
 import time
 from pathlib import Path
 import numpy as np
+
+ANSI_RESET = "\033[0m"
+ANSI_BOLD = "\033[1m"
+ANSI_DIM = "\033[2m"
+ANSI_CYAN = "\033[38;2;34;211;238m"
+ANSI_EMERALD = "\033[38;2;52;211;153m"
+ANSI_AMBER = "\033[38;2;251;191;36m"
+ANSI_ROSE = "\033[38;2;251;113;133m"
+ANSI_VIOLET = "\033[38;2;192;132;252m"
+ANSI_SLATE = "\033[38;2;148;163;184m"
 
 ROOT_DIR = Path(__file__).resolve().parents[1]
 OUT_JSON = ROOT_DIR / "web" / "src" / "data" / "evofedagg_ccnc2027.json"
@@ -250,27 +261,51 @@ def run_live_blas_speedup_check() -> dict:
 
 
 def main() -> None:
-    print("=" * 82)
-    print(" DevFest Stuttgart 2026 • Demo 03: Evo-FedAgg (IEEE CCNC 2027)")
-    print(" Automated Evolutionary Discovery of Byzantine-Resilient Aggregators for Edge-Cloud FL")
-    print(" Conference: https://ccnc2027.ieee-ccnc.org/ (DOI will be obtained after the conference)")
-    print("=" * 82)
+    if hasattr(sys.stdout, "reconfigure"):
+        sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 
+    print(f"{ANSI_CYAN}{'=' * 86}{ANSI_RESET}")
+    print(f"{ANSI_BOLD} DevFest Stuttgart 2026 • Demo 03: Evo-FedAgg (IEEE CCNC 2027){ANSI_RESET}")
+    print(" Automated Evolutionary Discovery of Byzantine-Resilient Aggregators for Edge-Cloud FL")
+    print(f"{ANSI_SLATE} Conference: https://ccnc2027.ieee-ccnc.org/ (DOI will be obtained after the conference){ANSI_RESET}")
+    print(f"{ANSI_CYAN}{'=' * 86}{ANSI_RESET}")
+
+    print(f"\n{ANSI_BOLD}{ANSI_CYAN}  Evolutionary Fitness Trajectory — S = 100/(1+E_bar) + 50*M - min(20, 2*T_lat){ANSI_RESET}")
+    print(f"  {ANSI_DIM}{'─' * 82}{ANSI_RESET}")
+    max_s = 125.0
+    bar_w = 34
     for row in CCNC_2027_TRAJECTORY:
-        tag = "★ CHAMPION" if row["status"] == "champion" else ("✗ REJECTED" if row["status"] == "rejected" else "  STEP    ")
+        if row["status"] == "champion":
+            color, tag = ANSI_EMERALD, "★ CHAMPION"
+        elif row["status"] == "rejected":
+            color, tag = ANSI_ROSE, "✗ REJECTED"
+        elif row["status"] == "seed":
+            color, tag = ANSI_SLATE, "  SEED    "
+        else:
+            color, tag = ANSI_CYAN, "  STEP    "
+
+        filled = max(1 if row["fitnessScore"] > 0 else 0, int(round((row["fitnessScore"] / max_s) * bar_w)))
+        bar = f"{color}{'█' * filled}{ANSI_DIM}{'░' * (bar_w - filled)}{ANSI_RESET}"
         print(
-            f"[{row['gen']} {tag}] Fitness S = {row['fitnessScore']:>6.2f} | "
-            f"Mitigation M = {row['mitigationPct']:>6.2f}% | "
-            f"T_lat = {row['latencyMs']:>4.2f} ms | {row['name']}"
+            f"  {color}{ANSI_BOLD}{row['gen']} {tag}{ANSI_RESET} │ {bar} │ "
+            f"{color}S={row['fitnessScore']:>6.2f}{ANSI_RESET} {ANSI_SLATE}| M={row['mitigationPct']:>5.1f}% | {row['latencyMs']:>4.2f}ms{ANSI_RESET}"
         )
 
     bench = run_live_blas_speedup_check()
-    print("-" * 82)
+    g3_ms = bench["evofedagg_blas_ms"]
+    mk_ms = bench["sequential_multikrum_ms"]
+    g3_bar_len = max(1, int(round((g3_ms / max(mk_ms, 1e-6)) * bar_w)))
+    print(f"\n{ANSI_BOLD}{ANSI_VIOLET}  Live Local Edge-Gateway Latency Benchmark (N={bench['N']} clients, d={bench['d']} params){ANSI_RESET}")
+    print(f"  {ANSI_DIM}{'─' * 82}{ANSI_RESET}")
     print(
-        f" Live Local BLAS Check (N={bench['N']}, d={bench['d']}): "
-        f"Evo-FedAgg G3 = {bench['evofedagg_blas_ms']} ms vs. "
-        f"Sequential Multi-Krum = {bench['sequential_multikrum_ms']} ms "
-        f"({bench['measured_local_speedup_x']}x local speedup | Paper N=200: 1,015.6 ms vs 17,524.5 ms = 17.2x!)"
+        f"  {ANSI_EMERALD}{ANSI_BOLD}Evo-FedAgg G3{ANSI_RESET} │ "
+        f"{ANSI_EMERALD}{'█' * g3_bar_len}{ANSI_DIM}{'░' * (bar_w - g3_bar_len)}{ANSI_RESET} │ "
+        f"{ANSI_EMERALD}{g3_ms:>6.2f} ms{ANSI_RESET} {ANSI_BOLD}({bench['measured_local_speedup_x']}x faster live!){ANSI_RESET}"
+    )
+    print(
+        f"  {ANSI_AMBER}Multi-Krum   {ANSI_RESET} │ "
+        f"{ANSI_AMBER}{'█' * bar_w}{ANSI_RESET} │ "
+        f"{ANSI_AMBER}{mk_ms:>6.2f} ms{ANSI_RESET} {ANSI_SLATE}(Paper N=200: 1,015.6 ms vs 17,524.5 ms = 17.2x){ANSI_RESET}"
     )
 
     OUT_JSON.parent.mkdir(parents=True, exist_ok=True)
@@ -292,7 +327,7 @@ def main() -> None:
         "trajectory": CCNC_2027_TRAJECTORY,
     }
     OUT_JSON.write_text(json.dumps(payload, indent=2), encoding="utf-8")
-    print(f"\n[OK] Exported IEEE CCNC 2027 Evo-FedAgg dataset -> {OUT_JSON}")
+    print(f"\n{ANSI_EMERALD}[OK]{ANSI_RESET} Exported IEEE CCNC 2027 Evo-FedAgg dataset -> {OUT_JSON}")
 
 
 if __name__ == "__main__":
