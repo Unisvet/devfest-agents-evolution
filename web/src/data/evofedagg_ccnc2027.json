@@ -1,0 +1,100 @@
+{
+  "paperTitle": "Automated Evolutionary Discovery of Byzantine-Resilient Aggregators for Edge-Cloud FL",
+  "venue": "IEEE CCNC 2027 (DOI will be obtained after the conference)",
+  "conferenceUrl": "https://ccnc2027.ieee-ccnc.org/",
+  "doiStatus": "DOI will be obtained after the conference",
+  "authors": "Svetlana Meissner, Peter Langendoerfer (BTU Cottbus-Senftenberg)",
+  "fitnessEquation": "S = 100 / (1 + E_bar) + 50 * M - min(20, 2.0 * T_lat)",
+  "gatewayScalingN200": {
+    "evofedaggMs": 1015.6,
+    "multiKrumMs": 17524.5,
+    "bulyanMs": 13598.4,
+    "speedupVsMultiKrum": 17.2,
+    "raspberryPi4N20Ms": 8.4
+  },
+  "localMicrobenchmark": {
+    "N": 120,
+    "d": 4096,
+    "evofedagg_blas_ms": 5.29,
+    "sequential_multikrum_ms": 387.31,
+    "measured_local_speedup_x": 73.2,
+    "max_numerical_diff": 0.0
+  },
+  "trajectory": [
+    {
+      "gen": "G0",
+      "generation": 0,
+      "status": "seed",
+      "name": "Naive Weighted FedAvg (Unhardened Seed)",
+      "meanError": 143.79,
+      "mitigationPct": 0.0,
+      "latencyMs": 0.04,
+      "fitnessScore": 0.61,
+      "mnistSignFlipAccPct": 35.9,
+      "mnistGaussAccPct": 19.1,
+      "mnistSybilAccPct": 69.8,
+      "summary": "Wide-Open Door (`FedAvg` seed, zero security hints): every particle passes straight through \u2014 a single Gaussian blast collapses accuracy from 79.1% to 19.1% (and 9.6% at 40% sign-flip).",
+      "code": "# EVOLVE-BLOCK-START\ndef execute_aggregation(updates, weights):\n    # G0 Unhardened Seed: Naive Weighted FedAvg\n    U = np.asarray(updates, dtype=np.float64)\n    return np.average(U, axis=0, weights=weights)\n# EVOLVE-BLOCK-END"
+    },
+    {
+      "gen": "G1",
+      "generation": 1,
+      "status": "improved",
+      "name": "Coordinate Trimmed-Mean (20%)",
+      "meanError": 73.75,
+      "mitigationPct": 48.71,
+      "latencyMs": 0.07,
+      "fitnessScore": 25.55,
+      "mnistSignFlipAccPct": 56.4,
+      "mnistGaussAccPct": 22.6,
+      "mnistSybilAccPct": 64.1,
+      "summary": "1D Slit Grating (`20%` coordinate trim): fast (0.07 ms), but sorting one axis at a time is blind to cross-dimensional geometry \u2014 coordinated Sybils slip through (M = 48.71%).",
+      "code": "# EVOLVE-BLOCK-START\ndef execute_aggregation(updates, weights):\n    # G1: Coordinate-wise 20% Trimmed Mean\n    U = np.sort(np.asarray(updates, dtype=np.float64), axis=0)\n    k = max(1, int(0.20 * len(U)))\n    return np.mean(U[k : len(U) - k], axis=0)\n# EVOLVE-BLOCK-END"
+    },
+    {
+      "gen": "G2",
+      "generation": 2,
+      "status": "improved",
+      "name": "Soft Inverse L2-Distance Weighting",
+      "meanError": 2.19,
+      "mitigationPct": 98.48,
+      "latencyMs": 0.67,
+      "fitnessScore": 79.24,
+      "mnistSignFlipAccPct": 67.9,
+      "mnistGaussAccPct": 67.8,
+      "mnistSybilAccPct": 68.5,
+      "summary": "Soft Gravity Well (Inverse-L2 weights): jumps from 1D slits to full d-dimensional Euclidean geometry (`98.48%` mitigation!), though soft weights still leak minor tail bias (`E_bar = 2.19`).",
+      "code": "# EVOLVE-BLOCK-START\ndef execute_aggregation(updates, weights):\n    # G2: Soft Inverse L2-Distance Weighting\n    U = np.asarray(updates, dtype=np.float64)\n    dists = np.linalg.norm(U - np.median(U, axis=0), axis=1)\n    w = 1.0 / (1e-4 + dists ** 2)\n    return np.sum(U * (w / w.sum())[:, None], axis=0)\n# EVOLVE-BLOCK-END"
+    },
+    {
+      "gen": "G3",
+      "generation": 3,
+      "status": "champion",
+      "name": "Evo-FedAgg Champion: BLAS Gram Top-K Filter",
+      "meanError": 0.42,
+      "mitigationPct": 99.71,
+      "latencyMs": 0.38,
+      "fitnessScore": 119.33,
+      "mnistSignFlipAccPct": 68.4,
+      "mnistGaussAccPct": 68.4,
+      "mnistSybilAccPct": 69.6,
+      "summary": "Relativistic BLAS Demon! Uses a single-pass `U @ U.T` snapshot (`0.38 ms`) to rank k-NN density and slam the trapdoor on the f highest-entropy outliers — 99.71% mitigation & 17.2× faster than Multi-Krum!",
+      "code": "# EVOLVE-BLOCK-START\ndef execute_aggregation(updates, weights):\n    # G3 Champion (Evo-FedAgg): Vectorized BLAS Gram Top-K Filter\n    U = np.asarray(updates, dtype=np.float64)\n    N, f = U.shape[0], int(0.30 * len(updates))\n    sq = np.sum(U * U, axis=1, keepdims=True)\n    D2 = np.maximum(0.0, sq + sq.T - 2.0 * (U @ U.T))\n    S = np.sum(np.partition(D2, N - f - 1, axis=1)[:, : N - f], axis=1)\n    return np.mean(U[np.argsort(S)[: N - f]], axis=0)\n# EVOLVE-BLOCK-END"
+    },
+    {
+      "gen": "G4",
+      "generation": 4,
+      "status": "rejected",
+      "name": "Coordinate Z-Score Mask (Z < 2.0) [REJECTED]",
+      "meanError": 6.9,
+      "mitigationPct": 95.2,
+      "latencyMs": 0.22,
+      "fitnessScore": 59.83,
+      "mnistSignFlipAccPct": 63.1,
+      "mnistGaussAccPct": 64.0,
+      "mnistSybilAccPct": 61.5,
+      "summary": "Over-Eager Gatekeeper (REJECTED): AlphaEvolve tries a Z < 2.0 mask, over-prunes honest non-IID tails (`S` drops 119.33 → 59.83), and the deterministic verifier automatically rejects the regression!",
+      "code": "# EVOLVE-BLOCK-START\ndef execute_aggregation(updates, weights):\n    # G4 Candidate (REJECTED by Verifier: S=59.83 < 119.33)\n    U = np.asarray(updates, dtype=np.float64)\n    z = np.abs((U - U.mean(0)) / (U.std(0) + 1e-6)) < 2.0\n    return (U * z).sum(0) / np.maximum(1.0, z.sum(0))\n# EVOLVE-BLOCK-END"
+    }
+  ]
+}

@@ -1,0 +1,20 @@
+[project]
+name = "devfest-agents-evolution-demos"
+version = "1.0.0"
+description = "Companion Python demos for DevFest Stuttgart 2026: Antigravity SDK, AlphaEvolve & TorchTPU/Pallas"
+requires-python = ">=3.11"
+dependencies = [
+    "python-dotenv>=1.0.1",
+    "numpy>=2.0.0",
+]
+
+[project.optional-dependencies]
+live-gcp = [
+    "google-genai>=1.0.0",
+    "google-antigravity>=2.0.0",
+    "google-cloud-discoveryengine>=0.13.0",
+    "google-auth>=2.35.0",
+]
+
+[tool.uv]
+dev-dependencies = []

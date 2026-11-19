@@ -1,0 +1,8 @@
+# Base dependencies (install inside .venv: `uv venv && uv pip install -r demos/requirements.txt`)
+python-dotenv>=1.0.1
+numpy>=2.0.0
+
+# Uncomment below for Live GCP / Antigravity SDK execution (`DEMO_EXECUTION_MODE=live`):
+# google-genai>=1.0.0
+# google-antigravity>=2.0.0
+# google-cloud-discoveryengine>=0.13.0
