@@ -18,9 +18,11 @@ to `web/src/data/circle_packing_n26.json` for live 2D visualization in the web d
 from __future__ import annotations
 
 import json
+import sys
 import time
 from pathlib import Path
 import numpy as np
+from scipy.optimize import minimize
 
 ROOT_DIR = Path(__file__).resolve().parents[1]
 OUT_JSON = ROOT_DIR / "web" / "src" / "data" / "circle_packing_n26.json"
@@ -218,24 +220,173 @@ def gen16_hexagonal_staggered() -> tuple[np.ndarray, np.ndarray]:
 
 
 # ==============================================================================
-# Milestone 3 (Gen 40): Multi-Island Variable-Radius + LP Polish (`~2.60+`)
+# Milestone 3 (Gen 40): Multi-Island Staggered Hex + SciPy SLSQP Polish (~2.634+)
 # ==============================================================================
+def init_staggered_rows(row_counts: list[int], transpose: bool = False) -> np.ndarray:
+    """Builds a staggered quasi-hexagonal layout for n=26 inside [0, 1]^2."""
+    n_rows = len(row_counts)
+    ys = np.linspace(0.095, 0.905, n_rows)
+    pts: list[list[float]] = []
+    for r_idx, count in enumerate(row_counts):
+        margin = 0.085 if count == 6 else (0.105 if r_idx % 2 == 0 else 0.115)
+        xs = np.linspace(margin, 1.0 - margin, count)
+        for x in xs:
+            pts.append([float(ys[r_idx]), float(x)] if transpose else [float(x), float(ys[r_idx])])
+    return np.array(pts, dtype=np.float64)
+
+
+def slsqp_polish_packing(
+    init_centers: np.ndarray,
+    init_radii: np.ndarray,
+    maxiter: int = 160,
+) -> tuple[np.ndarray, np.ndarray]:
+    """Jointly optimizes (x_i, y_i, r_i) via analytic-Jacobian SciPy SLSQP."""
+    n = N_CIRCLES
+    iu, ju = np.triu_indices(n, k=1)
+    n_pairs = len(iu)
+
+    # Precompute constant linear Jacobian for the 4n wall constraints
+    wall_jac = np.zeros((4 * n, 3 * n), dtype=np.float64)
+    idx = np.arange(n)
+    # x_i - r_i >= 0
+    wall_jac[idx, idx] = 1.0
+    wall_jac[idx, 2 * n + idx] = -1.0
+    # 1 - x_i - r_i >= 0
+    wall_jac[n + idx, idx] = -1.0
+    wall_jac[n + idx, 2 * n + idx] = -1.0
+    # y_i - r_i >= 0
+    wall_jac[2 * n + idx, n + idx] = 1.0
+    wall_jac[2 * n + idx, 2 * n + idx] = -1.0
+    # 1 - y_i - r_i >= 0
+    wall_jac[3 * n + idx, n + idx] = -1.0
+    wall_jac[3 * n + idx, 2 * n + idx] = -1.0
+
+    obj_grad = np.zeros(3 * n, dtype=np.float64)
+    obj_grad[2 * n :] = -1.0
+
+    def obj(v: np.ndarray) -> float:
+        return -float(np.sum(v[2 * n :]))
+
+    def obj_jac(_v: np.ndarray) -> np.ndarray:
+        return obj_grad
+
+    def wall_cons(v: np.ndarray) -> np.ndarray:
+        x = v[:n]
+        y = v[n : 2 * n]
+        r = v[2 * n :]
+        return np.concatenate([x - r, 1.0 - x - r, y - r, 1.0 - y - r])
+
+    def pair_cons(v: np.ndarray) -> np.ndarray:
+        x = v[:n]
+        y = v[n : 2 * n]
+        r = v[2 * n :]
+        dx = x[iu] - x[ju]
+        dy = y[iu] - y[ju]
+        rs = r[iu] + r[ju]
+        return dx * dx + dy * dy - rs * rs
+
+    def pair_jac(v: np.ndarray) -> np.ndarray:
+        x = v[:n]
+        y = v[n : 2 * n]
+        r = v[2 * n :]
+        dx = x[iu] - x[ju]
+        dy = y[iu] - y[ju]
+        rs = r[iu] + r[ju]
+        jac = np.zeros((n_pairs, 3 * n), dtype=np.float64)
+        p_idx = np.arange(n_pairs)
+        jac[p_idx, iu] = 2.0 * dx
+        jac[p_idx, ju] = -2.0 * dx
+        jac[p_idx, n + iu] = 2.0 * dy
+        jac[p_idx, n + ju] = -2.0 * dy
+        jac[p_idx, 2 * n + iu] = -2.0 * rs
+        jac[p_idx, 2 * n + ju] = -2.0 * rs
+        return jac
+
+    v0 = np.concatenate([init_centers[:, 0], init_centers[:, 1], init_radii])
+    bounds = [(0.005, 0.995)] * (2 * n) + [(0.01, 0.25)] * n
+
+    res = minimize(
+        obj,
+        v0,
+        method="SLSQP",
+        jac=obj_jac,
+        bounds=bounds,
+        constraints=[
+            {"type": "ineq", "fun": wall_cons, "jac": lambda _v: wall_jac},
+            {"type": "ineq", "fun": pair_cons, "jac": pair_jac},
+        ],
+        options={"maxiter": maxiter, "ftol": 1e-9, "disp": False},
+    )
+
+    v = res.x
+    centers = np.column_stack([v[:n], v[n : 2 * n]])
+    radii = np.maximum(0.0, v[2 * n :])
+
+    # Guarantee strict zero-overlap & boundary feasibility (< 1e-9 tolerance)
+    wall_cap = np.minimum(
+        np.minimum(centers[:, 0], 1.0 - centers[:, 0]),
+        np.minimum(centers[:, 1], 1.0 - centers[:, 1]),
+    )
+    radii = np.minimum(radii, wall_cap - 1e-8)
+    for _ in range(8):
+        diff = centers[:, None, :] - centers[None, :, :]
+        dists = np.sqrt(np.sum(diff ** 2, axis=-1))
+        np.fill_diagonal(dists, 10.0)
+        excess = (radii[:, None] + radii[None, :]) - dists
+        max_ex = float(np.max(excess))
+        if max_ex <= 0.0:
+            break
+        for i in range(n):
+            for j in range(i + 1, n):
+                ex = (radii[i] + radii[j]) - dists[i, j]
+                if ex > 0.0:
+                    half = 0.5 * ex + 1e-8
+                    radii[i] = max(0.0, radii[i] - half)
+                    radii[j] = max(0.0, radii[j] - half)
+        radii = np.minimum(radii, wall_cap - 1e-8)
+
+    return centers, radii
+
+
 def gen40_variable_radius_champion() -> tuple[np.ndarray, np.ndarray]:
-    best_score = -1.0
-    best_c, best_r = None, None
+    """Multi-island staggered hexagonal seeds + SciPy SLSQP nonlinear polish."""
+    candidates: list[tuple[np.ndarray, np.ndarray]] = []
+    rng = np.random.default_rng(2026)
+
+    patterns = [
+        ([5, 5, 6, 5, 5], False),
+        ([5, 6, 5, 5, 5], False),
+        ([6, 5, 5, 5, 5], False),
+        ([5, 5, 5, 6, 5], False),
+        ([5, 5, 6, 5, 5], True),
+    ]
+    for pat, transpose in patterns:
+        base = init_staggered_rows(pat, transpose=transpose)
+        for jitter_scale in (0.008, 0.022):
+            init_c = np.clip(base + rng.normal(0.0, jitter_scale, size=(N_CIRCLES, 2)), 0.05, 0.95)
+            c_phys, r_phys = optimize_packing_physics(init_c, steps=90, init_r=0.102)
+            candidates.append((c_phys, r_phys))
+
+    # Also include the best 5x5 + pocket physics seed
     grid = np.linspace(0.10, 0.90, 5)
     base_25 = [[float(gx), float(gy)] for gx in grid for gy in grid]
-    pockets = [[0.20, 0.20], [0.80, 0.80], [0.50, 0.20], [0.20, 0.50]]
+    init_pocket = np.clip(
+        np.array(base_25 + [[0.20, 0.20]], dtype=np.float64) + rng.normal(0.0, 0.02, size=(N_CIRCLES, 2)),
+        0.05,
+        0.95,
+    )
+    candidates.append(optimize_packing_physics(init_pocket, steps=110, init_r=0.103))
 
-    for seed_idx in range(24):
-        rng = np.random.default_rng(2026 + seed_idx)
-        pts = [list(p) for p in base_25] + [pockets[seed_idx % len(pockets)]]
-        init_c = np.clip(np.array(pts, dtype=np.float64) + rng.normal(0.0, 0.032, size=(N_CIRCLES, 2)), 0.05, 0.95)
-        c, r = optimize_packing_physics(init_c, steps=460, init_r=0.104)
-        sc = float(np.sum(r))
-        if sc > best_score:
-            best_score = sc
-            best_c, best_r = c, r
+    # Polish the top 6 diverse islands with analytic-Jacobian SciPy SLSQP
+    candidates.sort(key=lambda pair: float(np.sum(pair[1])), reverse=True)
+    best_score = -1.0
+    best_c, best_r = None, None
+    for c_init, r_init in candidates[:6]:
+        c_opt, r_opt = slsqp_polish_packing(c_init, r_init, maxiter=160)
+        verdict = verify_circle_packing(c_opt, r_opt)
+        if verdict["valid"] and verdict["score"] > best_score:
+            best_score = verdict["score"]
+            best_c, best_r = c_opt, r_opt
 
     assert best_c is not None and best_r is not None
     return best_c, best_r
@@ -253,7 +404,108 @@ def format_circles(centers: np.ndarray, radii: np.ndarray) -> list[dict]:
     ]
 
 
+# ==============================================================================
+# Stage-Ready ANSI Terminal Visualizations (Bar Chart + Braille 2D Circle Plot)
+# ==============================================================================
+ANSI_RESET = "\033[0m"
+ANSI_BOLD = "\033[1m"
+ANSI_DIM = "\033[2m"
+ANSI_CYAN = "\033[38;2;34;211;238m"
+ANSI_EMERALD = "\033[38;2;52;211;153m"
+ANSI_VIOLET = "\033[38;2;192;132;252m"
+ANSI_AMBER = "\033[38;2;251;191;36m"
+ANSI_SLATE = "\033[38;2;148;163;184m"
+
+_BRAILLE_BITS = (
+    (0x01, 0x08),
+    (0x02, 0x10),
+    (0x04, 0x20),
+    (0x40, 0x80),
+)
+
+
+def render_circle_braille(centers: np.ndarray, radii: np.ndarray, cols: int = 30, rows: int = 15) -> list[str]:
+    """Renders n=26 circles in [0, 1]^2 onto a high-res Unicode Braille grid (2*cols x 4*rows)."""
+    w, h = cols * 2, rows * 4
+    grid = np.zeros((h, w), dtype=bool)
+    angles = np.linspace(0.0, 2.0 * np.pi, 180, endpoint=False)
+    cos_a = np.cos(angles)
+    sin_a = np.sin(angles)
+
+    for (cx, cy), r in zip(centers, radii):
+        xs = np.clip(np.round((cx + r * cos_a) * (w - 1)).astype(int), 0, w - 1)
+        ys = np.clip(np.round((1.0 - (cy + r * sin_a)) * (h - 1)).astype(int), 0, h - 1)
+        grid[ys, xs] = True
+
+    lines: list[str] = []
+    for r_idx in range(rows):
+        row_chars: list[str] = []
+        y0 = r_idx * 4
+        for c_idx in range(cols):
+            x0 = c_idx * 2
+            mask = 0
+            for dy in range(4):
+                for dx in range(2):
+                    if grid[y0 + dy, x0 + dx]:
+                        mask |= _BRAILLE_BITS[dy][dx]
+            row_chars.append(chr(0x2800 + mask))
+        lines.append("".join(row_chars))
+    return lines
+
+
+def print_terminal_visuals(records: list[dict], snapshots: list[tuple[int, np.ndarray, np.ndarray]]) -> None:
+    """Prints a color-coded fitness bar chart and side-by-side Gen 0 vs Gen 40 circle packing plot."""
+    max_val = 2.65
+    bar_width = 38
+    colors = [ANSI_SLATE, ANSI_CYAN, ANSI_AMBER, ANSI_EMERALD]
+
+    print(f"\n{ANSI_BOLD}{ANSI_CYAN}  Evolutionary Fitness Progression — sum_of_radii (n = 26, zero overlaps){ANSI_RESET}")
+    print(f"  {ANSI_DIM}{'─' * 76}{ANSI_RESET}")
+
+    for idx, rec in enumerate(records):
+        val = rec["sumOfRadii"]
+        filled = int(round((val / max_val) * bar_width))
+        color = colors[min(idx, len(colors) - 1)]
+        bar = f"{color}{'█' * filled}{ANSI_DIM}{'░' * (bar_width - filled)}{ANSI_RESET}"
+        print(
+            f"  {ANSI_BOLD}Gen {rec['generation']:02d}{ANSI_RESET} │ {bar} │ "
+            f"{color}{val:.4f}{ANSI_RESET} {ANSI_SLATE}(+{rec['gainPct']:>5.1f}% | {rec['areaCoveragePct']:>4.1f}% area){ANSI_RESET}"
+        )
+
+    sota = 2.6359
+    sota_filled = int(round((sota / max_val) * bar_width))
+    sota_bar = f"{ANSI_VIOLET}{'▓' * sota_filled}{ANSI_DIM}{'░' * (bar_width - sota_filled)}{ANSI_RESET}"
+    print(
+        f"  {ANSI_VIOLET}Record{ANSI_RESET} │ {sota_bar} │ "
+        f"{ANSI_VIOLET}{sota:.4f}{ANSI_RESET} {ANSI_SLATE}(AlphaEvolve Paper SOTA: 2.63586){ANSI_RESET}"
+    )
+
+    # Side-by-side Braille 2D visualization: Gen 0 Seed vs Gen 40 Champion
+    if len(snapshots) >= 2:
+        g0_gen, g0_c, g0_r = snapshots[0]
+        g_last_gen, gl_c, gl_r = snapshots[-1]
+        cols, rows = 32, 16
+        left_lines = render_circle_braille(g0_c, g0_r, cols=cols, rows=rows)
+        right_lines = render_circle_braille(gl_c, gl_r, cols=cols, rows=rows)
+
+        left_title = f"Gen {g0_gen:02d} Seed (sum={records[0]['sumOfRadii']:.4f})"
+        right_title = f"Gen {g_last_gen:02d} Champion (sum={records[-1]['sumOfRadii']:.4f})"
+
+        print(f"\n  {ANSI_CYAN}{ANSI_BOLD}{left_title:<{cols + 2}}{ANSI_RESET}      {ANSI_EMERALD}{ANSI_BOLD}{right_title}{ANSI_RESET}")
+        top_border = f"┌{'─' * cols}┐"
+        bot_border = f"└{'─' * cols}┘"
+        print(f"  {ANSI_CYAN}{top_border}{ANSI_RESET}      {ANSI_EMERALD}{top_border}{ANSI_RESET}")
+        for l_row, r_row in zip(left_lines, right_lines):
+            print(
+                f"  {ANSI_CYAN}│{l_row}│{ANSI_RESET}      "
+                f"{ANSI_EMERALD}│{r_row}│{ANSI_RESET}"
+            )
+        print(f"  {ANSI_CYAN}{bot_border}{ANSI_RESET}      {ANSI_EMERALD}{bot_border}{ANSI_RESET}")
+
+
 def main() -> None:
+    if hasattr(sys.stdout, "reconfigure"):
+        sys.stdout.reconfigure(encoding="utf-8", errors="replace")
     t0 = time.perf_counter()
     milestones = [
         (
@@ -320,6 +572,7 @@ def construct_packing():
     print("=" * 80)
 
     records = []
+    snapshots: list[tuple[int, np.ndarray, np.ndarray]] = []
     seed_score = None
     prev_score = -1.0
     for gen, label, summary, code_snippet, fn in milestones:
@@ -335,6 +588,7 @@ def construct_packing():
             f"[Gen {gen:02d}] sum_of_radii = {verdict['score']:.4f} "
             f"(+{gain_pct:>5.1f}% vs seed | area={verdict['area_coverage_pct']:>4.1f}%) | {label}"
         )
+        snapshots.append((gen, centers, radii))
         records.append(
             {
                 "generation": gen,
@@ -348,16 +602,30 @@ def construct_packing():
             }
         )
 
+    print_terminal_visuals(records, snapshots)
+
+    elapsed_s = time.perf_counter() - t0
     OUT_JSON.parent.mkdir(parents=True, exist_ok=True)
     payload = {
         "problem": "Constructor-based circle packing for n=26 circles in [0, 1]^2",
         "codelabUrl": "https://codelabs.developers.google.com/alphaevolve-on-google-cloud-1#0",
         "repoUrl": "https://github.com/Google-Cloud-AI/alphaevolve-on-googlecloud/tree/main/examples/circle_packing",
-        "elapsedMs": round((time.perf_counter() - t0) * 1000.0, 1),
+        "elapsedMs": round(elapsed_s * 1000.0, 1),
         "milestones": records,
     }
     OUT_JSON.write_text(json.dumps(payload, indent=2), encoding="utf-8")
-    print(f"\n[OK] Verified all 4 n=26 packings (0 overlaps) & exported -> {OUT_JSON}")
+    best_pct_of_sota = (records[-1]["sumOfRadii"] / 2.63586) * 100.0
+    print(
+        f"\n{ANSI_EMERALD}[OK]{ANSI_RESET} Verified all 4 n=26 packings (0 overlaps) in {ANSI_BOLD}{elapsed_s:.2f}s{ANSI_RESET} "
+        f"({best_pct_of_sota:.2f}% of AlphaEvolve 2.63586 SOTA)"
+    )
+    print(f"     Exported -> {OUT_JSON}")
+    print(
+        f"\n{ANSI_AMBER}[Cloud AlphaEvolve Note]{ANSI_RESET} This ~{elapsed_s:.1f}s local demo runs the hybrid "
+        f"staggered-hex + SciPy SLSQP solver strategy directly.\n"
+        f"     A full real AlphaEvolve discovery run on Google Cloud (`ae` CLI with `gemini-4-argon` / Gemini 3.x)\n"
+        f"     evolves `# EVOLVE-BLOCK-START` from scratch over 50–100+ generations (~15–30 min on Cloud)."
+    )
 
 
 if __name__ == "__main__":

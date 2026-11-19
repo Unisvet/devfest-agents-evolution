@@ -102,19 +102,6 @@ export const Navbar: React.FC<{
 
           <button
             type="button"
-            onClick={onToggleDemoMode}
-            title="Switch between Stage-Safe Prerecorded traces and Live GCP / SDK mode"
-            className={`px-2.5 py-1.5 rounded-lg text-[11px] font-mono font-semibold border transition ${
-              demoMode === 'live'
-                ? 'bg-emerald-500/20 text-emerald-300 border-emerald-400/50'
-                : 'bg-slate-900 text-cyan-300 border-slate-700 hover:border-cyan-500/40'
-            }`}
-          >
-            {demoMode === 'live' ? '● LIVE GCP' : '◉ PRERECORDED'}
-          </button>
-
-          <button
-            type="button"
             onClick={onToggleSound}
             title="Toggle Stage Transition Audio (Shortcut: M)"
             className={`p-1.5 rounded-lg border transition ${

@@ -6,15 +6,13 @@ requires-python = ">=3.11"
 dependencies = [
     "python-dotenv>=1.0.1",
     "numpy>=2.0.0",
+    "scipy>=1.14.0",
 ]
 
 [project.optional-dependencies]
 live-gcp = [
     "google-genai>=1.0.0",
-    "google-antigravity>=2.0.0",
+    "google-antigravity>=0.1.0",
     "google-cloud-discoveryengine>=0.13.0",
     "google-auth>=2.35.0",
 ]
-
-[tool.uv]
-dev-dependencies = []

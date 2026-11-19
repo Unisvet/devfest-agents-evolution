@@ -122,7 +122,7 @@ export const SlideWidgetRenderer: React.FC<{
               },
               {
                 step: '02 • Discovery Engine Ensemble (`acquire_programs`)',
-                desc: '`gemini-3.5-flash` (high-breadth search) + `gemini-3.1-pro-preview` (structural leaps) + MAP-Elites islands.',
+                desc: '`gemini-4-argon` (Cloud default) + `gemini-3.8-flash` / `gemini-3.1-pro-preview` across MAP-Elites islands.',
                 color: 'border-purple-500/35 text-purple-300',
               },
               {

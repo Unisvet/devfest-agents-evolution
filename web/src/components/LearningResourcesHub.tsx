@@ -46,14 +46,6 @@ export const LearningResourcesHub: React.FC = () => {
             >
               Watch on YouTube Live <ExternalLink className="w-4 h-4" />
             </a>
-            <a
-              href="https://github.com/Unisvet/devfest-agents-evolution"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold bg-slate-950 hover:bg-slate-800 text-cyan-300 border border-cyan-500/35 transition"
-            >
-              Explore Companion GitHub Repo <ExternalLink className="w-4 h-4" />
-            </a>
           </div>
         </div>
 

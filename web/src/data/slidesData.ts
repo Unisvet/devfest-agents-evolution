@@ -274,7 +274,7 @@ export const SLIDES_DATA: SlideDefinition[] = [
       'AlphaEvolve decouples Cloud LLM Mutation (managed Discovery Engine service) from User-Controlled Evaluation (running securely inside YOUR environment with zero code lock-in).',
     bullets: [
       'Surgical `# EVOLVE-BLOCK-START` Markers: Constrain mutations to hot loops while keeping I/O signatures & test harnesses immutable.',
-      'Dual-Model Mixture + MAP-Elites: `gemini-3.5-flash` drives high-breadth exploration; `gemini-3.1-pro-preview` synthesizes deep algorithmic leaps across diverse islands.',
+      'Dual-Model Mixture + MAP-Elites: `gemini-4-argon` (Cloud default) & `gemini-3.8-flash` drive high-breadth exploration; `gemini-3.1-pro-preview` synthesizes deep algorithmic leaps across islands.',
       'Actionable `-inf` Insights: Broken candidates return `-inf` PLUS `AlphaEvolveEvaluationInsight` error diagnostics so Gemini self-repairs on the next generation!',
     ],
     metrics: [
@@ -297,17 +297,18 @@ export const SLIDES_DATA: SlideDefinition[] = [
     title: 'Live Visual Demo 2A: Codelab n=26 Circle Packing',
     subtitle: 'Official Codelab (`alphaevolve-on-google-cloud-1`) — Seeing Evolution Discover Geometry!',
     keyTakeaway:
-      'Starting from the Codelab’s clipped concentric-ring seed (`sum_of_radii = 0.960`), evolutionary mutations invent lattice pockets, staggered hex rows, and variable-radius corner packing (`2.603`, +171.2%) with ZERO overlaps!',
+      'Starting from the Codelab’s clipped concentric-ring seed (`sum_of_radii = 0.960`), evolutionary mutations invent lattice pockets, staggered hex rows, and variable-radius SLSQP packing (`2.631`, +174.1% — 99.8% of AlphaEvolve’s `2.6359` SOTA) with ZERO overlaps!',
     bullets: [
       'Gen 0 (Codelab Seed): 1 + 8 + 16 concentric rings clip to `[0.01, 0.99]` — crushing outer 16 circles to `r = 0.01` (`24.7%` area).',
       'Gen 5 → Gen 16: Discovers 5×5 lattice + pocket (`2.454`) and physics-relaxed staggered rows (`2.537`, matching Codelab 10-step target!).',
-      'Gen 40 Champion: Multi-island variable-radius inflation + subgradient polish hits `2.603` (`84.3%` unit-square coverage, `0` overlaps!).',
+      'Gen 40 Champion: Multi-island staggered-hex + SciPy `SLSQP` polish hits `2.631` (`86.1%` area, `99.8%` of `2.6359` SOTA, `0` overlaps!).',
+      'Cloud AlphaEvolve Note: Local VS Code / browser demo executes the evolved hybrid solver in `~1 s`; full Cloud discovery (`ae` CLI with `gemini-4-argon` / Gemini 3.x) evolves `# EVOLVE-BLOCK-START` from scratch over 50–100+ generations (`~15–30 min`).',
     ],
     widget: 'demo-circle-packing',
     illustration: {
       src: 'media/slides/slide-08-circle-packing.png',
       alt: 'Macro isometric 3D render of 26 iridescent cyan, emerald, and violet glass spheres packed tightly inside a glowing laser-etched unit square',
-      caption: 'n=26 Unit-Square Circle Packing — Evolved Variable-Radius Equilibrium (+171.2% Radii Gain)',
+      caption: 'n=26 Unit-Square Circle Packing — Evolved Variable-Radius Equilibrium (+174.1% Radii Gain, 99.8% of SOTA)',
     },
   },
   {
