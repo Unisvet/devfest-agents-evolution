@@ -297,12 +297,12 @@ export const SLIDES_DATA: SlideDefinition[] = [
     title: 'Live Visual Demo 2A: Codelab n=26 Circle Packing',
     subtitle: 'Official Codelab (`alphaevolve-on-google-cloud-1`) — Seeing Evolution Discover Geometry!',
     keyTakeaway:
-      'Starting from the Codelab’s clipped concentric-ring seed (`sum_of_radii = 0.960`), evolutionary mutations invent lattice pockets, staggered hex rows, and variable-radius SLSQP packing (`2.631`, +174.1% — 99.8% of AlphaEvolve’s `2.6359` SOTA) with ZERO overlaps!',
+      'Starting from the Codelab’s clipped seed (`0.960`), evolution discovers staggered hex + SLSQP packing (`2.631` locally) — showing how AlphaEvolve (`2.6359`) broke David Cantrell’s 14-year human record (`2.634`, 2011) with ZERO overlaps!',
     bullets: [
       'Gen 0 (Codelab Seed): 1 + 8 + 16 concentric rings clip to `[0.01, 0.99]` — crushing outer 16 circles to `r = 0.01` (`24.7%` area).',
       'Gen 5 → Gen 16: Discovers 5×5 lattice + pocket (`2.454`) and physics-relaxed staggered rows (`2.537`, matching Codelab 10-step target!).',
-      'Gen 40 Champion: Multi-island staggered-hex + SciPy `SLSQP` polish hits `2.631` (`86.1%` area, `99.8%` of `2.6359` SOTA, `0` overlaps!).',
-      'Cloud AlphaEvolve Note: Local VS Code / browser demo executes the evolved hybrid solver in `~1 s`; full Cloud discovery (`ae` CLI with `gemini-4-argon` / Gemini 3.x) evolves `# EVOLVE-BLOCK-START` from scratch over 50–100+ generations (`~15–30 min`).',
+      'Gen 40 vs. Human Record: Local staggered-hex + SciPy `SLSQP` hits `2.631` (`86.1%` area) — just shy of the 2011 human record (`2.634`, Cantrell), which AlphaEvolve beat at `2.6359`!',
+      'Cloud AlphaEvolve Note: Local VS Code / browser demo runs the evolved hybrid solver in `~1 s`; full Cloud discovery (`ae` CLI with `gemini-4-argon` / Gemini 3.x) evolves `# EVOLVE-BLOCK-START` from scratch over 50–100+ generations (`~15–30 min`).',
     ],
     widget: 'demo-circle-packing',
     illustration: {

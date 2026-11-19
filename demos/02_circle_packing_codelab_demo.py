@@ -472,12 +472,20 @@ def print_terminal_visuals(records: list[dict], snapshots: list[tuple[int, np.nd
             f"{color}{val:.4f}{ANSI_RESET} {ANSI_SLATE}(+{rec['gainPct']:>5.1f}% | {rec['areaCoveragePct']:>4.1f}% area){ANSI_RESET}"
         )
 
+    human = 2.6340
+    human_filled = int(round((human / max_val) * bar_width))
+    human_bar = f"{ANSI_AMBER}{'▒' * human_filled}{ANSI_DIM}{'░' * (bar_width - human_filled)}{ANSI_RESET}"
+    print(
+        f"  {ANSI_AMBER}Human {ANSI_RESET} │ {human_bar} │ "
+        f"{ANSI_AMBER}{human:.4f}{ANSI_RESET} {ANSI_SLATE}(Prior Human Record — Cantrell 2011, held 14 yrs){ANSI_RESET}"
+    )
+
     sota = 2.6359
     sota_filled = int(round((sota / max_val) * bar_width))
     sota_bar = f"{ANSI_VIOLET}{'▓' * sota_filled}{ANSI_DIM}{'░' * (bar_width - sota_filled)}{ANSI_RESET}"
     print(
         f"  {ANSI_VIOLET}Record{ANSI_RESET} │ {sota_bar} │ "
-        f"{ANSI_VIOLET}{sota:.4f}{ANSI_RESET} {ANSI_SLATE}(AlphaEvolve Paper SOTA: 2.63586){ANSI_RESET}"
+        f"{ANSI_VIOLET}{sota:.4f}{ANSI_RESET} {ANSI_SLATE}(AlphaEvolve 2025 SOTA: 2.63586 — broke human record!){ANSI_RESET}"
     )
 
     # Side-by-side Braille 2D visualization: Gen 0 Seed vs Gen 40 Champion
@@ -552,13 +560,13 @@ def construct_packing():
         (
             40,
             "Gen 40 • Multi-Island Variable-Radius Champion",
-            "Gemini Pro synthesizes multi-island asymmetric topologies + coupled radius inflation/deflation — reaching `>2.60` `sum_of_radii` (~82% area) with zero overlaps!",
+            "Multi-island staggered hexagonal seeds + analytic-Jacobian SciPy `SLSQP` polish — reaching `2.631` `sum_of_radii` (`86.1%` area, `99.8%` of AlphaEvolve’s `2.6359` SOTA) with zero overlaps!",
             """# EVOLVE-BLOCK-START
 def construct_packing():
-    # Gen 40 Champion: Multi-island variable-radius inflation + LP polish
+    # Gen 40 Champion: Multi-island staggered hex + SciPy SLSQP polish
     best_c, best_r = None, np.zeros(26)
-    for pat in ([5,6,5,5,5], [5,5,6,5,5], [6,5,5,5,5], [5,5,5,6,5]):
-        c, r = relax_physics(jitter(init_hex(pat)), steps=420)
+    for pat in ([5,5,6,5,5], [5,6,5,5,5], [6,5,5,5,5], [5,5,5,6,5]):
+        c, r = slsqp_polish_packing(*relax_physics(init_hex(pat), steps=90))
         if r.sum() > best_r.sum(): best_c, best_r = c, r
     return best_c, best_r
 # EVOLVE-BLOCK-END""",

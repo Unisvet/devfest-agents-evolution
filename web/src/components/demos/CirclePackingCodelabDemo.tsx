@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { CheckCircle2, ExternalLink, Play, Sparkles, Wand2 } from 'lucide-react';
+import { CheckCircle2, Cloud, ExternalLink, Play, Sparkles, Wand2, X } from 'lucide-react';
 import packingDataset from '../../data/circle_packing_n26.json';
 import { CirclePackingMilestone, CircleSpec } from '../../types/presentation';
 import { soundEngine } from '../../utils/soundEngine';
@@ -97,11 +97,24 @@ function stepBrowserPhysicsRelaxation(circles: CircleSpec[], iterations = 25): {
 export const CirclePackingCodelabDemo: React.FC = () => {
   const [selectedIdx, setSelectedIdx] = useState<number>(3);
   const [isAutoPlaying, setIsAutoPlaying] = useState<boolean>(false);
+  const [showAeModal, setShowAeModal] = useState<boolean>(false);
   const [liveOverride, setLiveOverride] = useState<{
     circles: CircleSpec[];
     sumOfRadii: number;
     areaCoveragePct: number;
   } | null>(null);
+
+  useEffect(() => {
+    if (!showAeModal) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        e.stopPropagation();
+        setShowAeModal(false);
+      }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [showAeModal]);
 
   const baseMilestone = MILESTONES[selectedIdx];
   const circles = liveOverride ? liveOverride.circles : baseMilestone.circles;
@@ -163,7 +176,15 @@ export const CirclePackingCodelabDemo: React.FC = () => {
             ))}
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap">
+            <button
+              type="button"
+              onClick={() => setShowAeModal(true)}
+              title="How a real Google Cloud AlphaEvolve (ae) experiment works"
+              className="no-print inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs sm:text-sm font-mono font-bold bg-amber-500/15 hover:bg-amber-500/25 text-amber-200 border border-amber-400/45 transition"
+            >
+              <Cloud className="w-4 h-4" /> How ae Works
+            </button>
             <button
               type="button"
               onClick={handleLiveRelax}
@@ -296,6 +317,119 @@ export const CirclePackingCodelabDemo: React.FC = () => {
             : baseMilestone.summary}
         </span>
       </div>
+
+      {showAeModal && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-label="How a real Google Cloud AlphaEvolve experiment works"
+          onClick={() => setShowAeModal(false)}
+          className="no-print fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-4 sm:p-6"
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="w-full max-w-3xl max-h-[90vh] overflow-y-auto rounded-3xl bg-slate-900 border border-cyan-500/45 shadow-2xl p-6 sm:p-7 space-y-5"
+          >
+            <div className="flex items-start justify-between gap-4 border-b border-slate-800 pb-4">
+              <div>
+                <span className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full text-xs font-mono font-bold bg-amber-500/15 text-amber-200 border border-amber-400/40 mb-2">
+                  <Cloud className="w-3.5 h-3.5" /> Google Cloud AlphaEvolve (`ae` CLI &amp; Discovery Engine)
+                </span>
+                <h3 className="text-xl sm:text-2xl font-extrabold text-white">
+                  How a Real Cloud AlphaEvolve Experiment Works
+                </h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowAeModal(false)}
+                aria-label="Close modal"
+                className="p-2 rounded-xl bg-slate-950 border border-slate-800 text-slate-300 hover:text-white hover:border-cyan-500/50 transition"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="rounded-2xl bg-slate-950/90 border border-cyan-500/35 p-4 space-y-1.5">
+                <div className="text-xs font-mono font-bold text-cyan-300 uppercase tracking-wide">
+                  File 1 You Write • Seed Only
+                </div>
+                <div className="text-sm font-mono font-bold text-white">
+                  demos/alphaevolve_circle_packing/program.py
+                </div>
+                <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
+                  Just the naive Gen 0 concentric-ring seed (<code className="text-cyan-300">0.9598</code>) wrapped in{' '}
+                  <code className="text-cyan-300"># EVOLVE-BLOCK-START ... END</code>. You never hand-write Gen 5–40!
+                </p>
+              </div>
+              <div className="rounded-2xl bg-slate-950/90 border border-emerald-500/35 p-4 space-y-1.5">
+                <div className="text-xs font-mono font-bold text-emerald-300 uppercase tracking-wide">
+                  File 2 You Write • Deterministic Verifier
+                </div>
+                <div className="text-sm font-mono font-bold text-white">
+                  demos/alphaevolve_circle_packing/evaluate.py
+                </div>
+                <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
+                  Checks zero overlaps &amp; <code className="text-emerald-300">[0, 1]²</code> containment, returning{' '}
+                  <code className="text-emerald-300">sum_of_radii</code> or <code className="text-rose-300">-inf</code>{' '}
+                  plus a diagnostic insight string so Gemini self-repairs.
+                </p>
+              </div>
+            </div>
+
+            <div className="space-y-2.5">
+              <div className="text-xs font-mono font-bold text-purple-300 uppercase tracking-wider">
+                The 4-Step Cloud Evolutionary Loop (~15–30 min over 50–100+ Generations)
+              </div>
+              <ol className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-xs sm:text-sm text-slate-200">
+                <li className="rounded-xl bg-slate-950/80 border border-slate-800 p-3">
+                  <strong className="text-cyan-300">1. Launch (`ae` CLI):</strong> Upload seed{' '}
+                  <code>program.py</code> + select Cloud models (<code>gemini-4-argon</code> default /{' '}
+                  <code>gemini-3.1-pro-preview</code>).
+                </li>
+                <li className="rounded-xl bg-slate-950/80 border border-slate-800 p-3">
+                  <strong className="text-purple-300">2. Mutate (`acquire_programs`):</strong> Cloud Discovery Engine
+                  mutates <em>only</em> inside <code># EVOLVE-BLOCK</code> using top MAP-Elites programs &amp; insights.
+                </li>
+                <li className="rounded-xl bg-slate-950/80 border border-slate-800 p-3">
+                  <strong className="text-emerald-300">3. Evaluate Locally / TPU:</strong> Your worker runs{' '}
+                  <code>evaluate.py</code> inside YOUR environment—proprietary data &amp; verifier never leave.
+                </li>
+                <li className="rounded-xl bg-slate-950/80 border border-slate-800 p-3">
+                  <strong className="text-amber-300">4. Submit (`submit_program_evaluations`):</strong> Return numeric
+                  score + error diagnostics; repeat until Gemini invents staggered-hex + SciPy <code>SLSQP</code>!
+                </li>
+              </ol>
+            </div>
+
+            <div className="rounded-2xl bg-amber-950/25 border border-amber-500/35 px-4 py-3 text-xs sm:text-sm text-slate-200 leading-relaxed">
+              <strong className="text-amber-300">Why this slide &amp; VS Code demo finish in ~1 second:</strong> On
+              stage we run a deterministic time-lapse of 4 verified checkpoints (<code className="text-cyan-300">0.960</code>{' '}
+              → <code className="text-emerald-300">2.631</code>), comparing directly against{' '}
+              <strong className="text-amber-200">David Cantrell’s 2011 human record (2.6340, held 14 yrs)</strong> and{' '}
+              <strong className="text-purple-200">AlphaEvolve’s 2025 SOTA (2.63586)</strong>.
+            </div>
+
+            <div className="flex flex-wrap items-center justify-between gap-3 pt-1">
+              <a
+                href="https://github.com/Unisvet/devfest-agents-evolution/tree/main/demos/alphaevolve_circle_packing"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-mono font-semibold text-cyan-300 hover:text-cyan-200 underline underline-offset-2"
+              >
+                Open program.py &amp; evaluate.py on GitHub <ExternalLink className="w-3.5 h-3.5" />
+              </a>
+              <button
+                type="button"
+                onClick={() => setShowAeModal(false)}
+                className="px-4 py-1.5 rounded-xl text-xs sm:text-sm font-bold bg-cyan-400 hover:bg-cyan-300 text-slate-950 transition"
+              >
+                Back to Demo (Esc)
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

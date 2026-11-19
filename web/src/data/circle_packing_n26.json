@@ -2,7 +2,7 @@
   "problem": "Constructor-based circle packing for n=26 circles in [0, 1]^2",
   "codelabUrl": "https://codelabs.developers.google.com/alphaevolve-on-google-cloud-1#0",
   "repoUrl": "https://github.com/Google-Cloud-AI/alphaevolve-on-googlecloud/tree/main/examples/circle_packing",
-  "elapsedMs": 906.0,
+  "elapsedMs": 973.8,
   "milestones": [
     {
       "generation": 0,
@@ -511,8 +511,8 @@
       "sumOfRadii": 2.6307,
       "gainPct": 174.1,
       "areaCoveragePct": 86.14,
-      "summary": "Gemini Pro synthesizes multi-island asymmetric topologies + coupled radius inflation/deflation \u2014 reaching `>2.60` `sum_of_radii` (~82% area) with zero overlaps!",
-      "code": "# EVOLVE-BLOCK-START\ndef construct_packing():\n    # Gen 40 Champion: Multi-island variable-radius inflation + LP polish\n    best_c, best_r = None, np.zeros(26)\n    for pat in ([5,6,5,5,5], [5,5,6,5,5], [6,5,5,5,5], [5,5,5,6,5]):\n        c, r = relax_physics(jitter(init_hex(pat)), steps=420)\n        if r.sum() > best_r.sum(): best_c, best_r = c, r\n    return best_c, best_r\n# EVOLVE-BLOCK-END",
+      "summary": "Multi-island staggered hexagonal seeds + analytic-Jacobian SciPy `SLSQP` polish \u2014 reaching `2.631` `sum_of_radii` (`86.1%` area, `99.8%` of AlphaEvolve\u2019s `2.6359` SOTA) with zero overlaps!",
+      "code": "# EVOLVE-BLOCK-START\ndef construct_packing():\n    # Gen 40 Champion: Multi-island staggered hex + SciPy SLSQP polish\n    best_c, best_r = None, np.zeros(26)\n    for pat in ([5,5,6,5,5], [5,6,5,5,5], [6,5,5,5,5], [5,5,5,6,5]):\n        c, r = slsqp_polish_packing(*relax_physics(init_hex(pat), steps=90))\n        if r.sum() > best_r.sum(): best_c, best_r = c, r\n    return best_c, best_r\n# EVOLVE-BLOCK-END",
       "circles": [
         {
           "id": 0,
