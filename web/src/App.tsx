@@ -23,7 +23,11 @@ export const App: React.FC = () => {
     setSoundEnabled((prev) => {
       const next = !prev;
       soundEngine.enabled = next;
-      if (next) soundEngine.playSlideTransition('next');
+      if (next) {
+        soundEngine.playSlideTransition('next');
+      } else {
+        soundEngine.stopSlide1Overture();
+      }
       return next;
     });
   };

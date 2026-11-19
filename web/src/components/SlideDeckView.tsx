@@ -14,6 +14,7 @@ import {
   PanelTop,
   PanelTopClose,
   Printer,
+  QrCode,
   Sparkles,
   Volume2,
   VolumeX,
@@ -81,6 +82,7 @@ export const SlideDeckView: React.FC<{
   const [slideIdx, setSlideIdx] = useState<number>(() => getInitialSlideIndex(total));
   const [showNotes, setShowNotes] = useState<boolean>(false);
   const [showOverview, setShowOverview] = useState<boolean>(false);
+  const [showQrModal, setShowQrModal] = useState<boolean>(false);
   const [mediaTab, setMediaTab] = useState<'widget' | 'illustration'>('widget');
   const [activeEpochIdx, setActiveEpochIdx] = useState<number | null>(null);
   const [oscIdle, setOscIdle] = useState<boolean>(false);
@@ -100,7 +102,20 @@ export const SlideDeckView: React.FC<{
 
   useEffect(() => {
     setActiveEpochIdx(null);
+    setShowQrModal(false);
   }, [slideIdx]);
+
+  // Play the Lyria 3.5 orchestral overture on Slide 1 whenever Stage Audio Cues are enabled
+  useEffect(() => {
+    if (soundEnabled && slideIdx === 0) {
+      soundEngine.startSlide1Overture();
+    } else {
+      soundEngine.stopSlide1Overture();
+    }
+    return () => {
+      soundEngine.stopSlide1Overture();
+    };
+  }, [soundEnabled, slideIdx]);
 
   useEffect(() => {
     const onHashChange = () => {
@@ -186,14 +201,16 @@ export const SlideDeckView: React.FC<{
     const onKey = (e: KeyboardEvent) => {
       const target = e.target as HTMLElement | null;
       if (target && ['INPUT', 'TEXTAREA', 'SELECT', 'BUTTON', 'A'].includes(target.tagName)) {
-        if (e.key === 'Escape' && showOverview) {
-          setShowOverview(false);
+        if (e.key === 'Escape') {
+          if (showQrModal) setShowQrModal(false);
+          else if (showOverview) setShowOverview(false);
         }
         return;
       }
 
       if (e.key === 'Escape') {
-        if (showOverview) setShowOverview(false);
+        if (showQrModal) setShowQrModal(false);
+        else if (showOverview) setShowOverview(false);
         else if (showNotes) setShowNotes(false);
         return;
       }
@@ -204,6 +221,8 @@ export const SlideDeckView: React.FC<{
       } else if (e.key === 'ArrowLeft' || e.key === 'PageUp') {
         e.preventDefault();
         goPrev();
+      } else if (e.key.toLowerCase() === 'q' && slide.number === 1) {
+        setShowQrModal((s) => !s);
       } else if (e.key.toLowerCase() === 'n' && HAS_LOCAL_NOTES) {
         setShowNotes((s) => !s);
       } else if (e.key.toLowerCase() === 'o' || e.key.toLowerCase() === 'g') {
@@ -225,7 +244,7 @@ export const SlideDeckView: React.FC<{
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [goNext, goPrev, showNotes, showOverview, slide.illustration, slide.layout, slide.panoramaEpochs, toggleFullscreen]);
+  }, [goNext, goPrev, showNotes, showOverview, showQrModal, slide.illustration, slide.layout, slide.number, slide.panoramaEpochs, toggleFullscreen]);
 
   const metricBadgeStyle = (accent: 'cyan' | 'emerald' | 'purple' | 'amber') => {
     switch (accent) {
@@ -282,6 +301,17 @@ export const SlideDeckView: React.FC<{
 
             {/* Floating-style Top-Right Date / Time / Pagination Badges */}
             <div className="flex items-center gap-2 shrink-0 font-mono">
+              {slide.number === 1 && (
+                <button
+                  type="button"
+                  onClick={() => setShowQrModal(true)}
+                  title="Show Live Presentation QR Code (Shortcut: Q)"
+                  className="no-print inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs sm:text-sm font-bold bg-emerald-500/20 text-emerald-200 border border-emerald-400/55 hover:bg-emerald-400 hover:text-slate-950 shadow-[0_0_16px_rgba(52,211,153,0.28)] transition"
+                >
+                  <QrCode className="w-3.5 h-3.5" />
+                  <span>Show QR Code</span>
+                </button>
+              )}
               <a
                 href="https://devfest.gdg-stuttgart.dev/"
                 target="_blank"
@@ -685,6 +715,67 @@ export const SlideDeckView: React.FC<{
           {isFullscreen ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
         </button>
       </div>
+
+      {/* Full-Screen QR Code Popup Modal (Slide 1 — Shortcut: Q) */}
+      {showQrModal && (
+        <div
+          className="no-print fixed inset-0 z-50 bg-slate-950/88 backdrop-blur-lg flex items-center justify-center p-6"
+          onClick={() => setShowQrModal(false)}
+          role="dialog"
+          aria-modal="true"
+          aria-label="Live Presentation QR Code"
+        >
+          <div
+            className="relative w-full max-w-md rounded-3xl bg-slate-900/95 border border-emerald-400/45 p-6 sm:p-8 shadow-[0_24px_70px_rgba(0,0,0,0.75)] flex flex-col items-center text-center gap-4"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              type="button"
+              onClick={() => setShowQrModal(false)}
+              title="Close QR Code (Esc)"
+              className="absolute top-4 right-4 p-2 rounded-xl bg-slate-950 hover:bg-slate-800 text-slate-200 border border-slate-700 transition"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-mono font-bold uppercase tracking-wider bg-emerald-500/15 text-emerald-300 border border-emerald-400/35">
+              <QrCode className="w-3.5 h-3.5" /> DevFest Stuttgart 2026 • Live Deck
+            </span>
+
+            <div>
+              <h2 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
+                Scan to Follow Along
+              </h2>
+              <p className="text-sm text-slate-300 mt-1">
+                Interactive slides, live demos &amp; learning hub
+              </p>
+            </div>
+
+            <div className="rounded-2xl bg-white p-5 shadow-2xl border-4 border-emerald-400/30">
+              <img
+                src="media/devfest-stuttgart-2026-qrcode.png"
+                alt="QR code linking to the DevFest Stuttgart 2026 interactive presentation"
+                className="w-60 h-60 sm:w-72 sm:h-72 object-contain"
+                style={{ imageRendering: 'pixelated' }}
+              />
+            </div>
+
+            <a
+              href="https://unisvet.github.io/devfest-agents-evolution/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-slate-950 hover:bg-slate-800 border border-cyan-500/40 text-xs sm:text-sm font-mono font-semibold text-cyan-300 transition"
+            >
+              <span>unisvet.github.io/devfest-agents-evolution</span>
+              <ExternalLink className="w-3.5 h-3.5 shrink-0" />
+            </a>
+
+            <div className="text-xs font-mono text-slate-400">
+              Press <kbd className="px-1.5 py-0.5 rounded bg-slate-800 text-slate-200">Esc</kbd> or click outside to close
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Full-Screen Slide Overview Grid Modal (Marp 'O' key style) */}
       {showOverview && (
