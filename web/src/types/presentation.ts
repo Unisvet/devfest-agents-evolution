@@ -26,6 +26,7 @@ export interface SlideMetric {
   label: string;
   value: string;
   accent: 'cyan' | 'emerald' | 'purple' | 'amber';
+  href?: string;
 }
 
 export interface SlideIllustration {

@@ -2,7 +2,7 @@ import React from 'react';
 import { ArrowLeft, Cpu, Printer, Sparkles } from 'lucide-react';
 import { SLIDES_DATA } from '../data/slidesData';
 import { DemoExecutionMode } from '../types/presentation';
-import { FormattedText } from './FormattedText';
+import { FormattedText, stripMarkdownLinks } from './FormattedText';
 import { SlideWidgetRenderer } from './SlideWidgetRenderer';
 import { VisualPanoramaSlideBody } from './VisualPanoramaSlideBody';
 
@@ -77,7 +77,8 @@ export const PrintPdfDeckView: React.FC<{
       <div className="w-full px-6 sm:px-10 lg:px-14 xl:px-20 space-y-8 print:px-0 print:space-y-0">
         {SLIDES_DATA.map((slide) => {
           const narrativeChars =
-            slide.keyTakeaway.length + slide.bullets.reduce((acc, b) => acc + b.length, 0);
+            stripMarkdownLinks(slide.keyTakeaway).length +
+            slide.bullets.reduce((acc, b) => acc + stripMarkdownLinks(b).length, 0);
           const isConciseSlide = narrativeChars < 530 && slide.bullets.length <= 3;
           const isDenseSlide = slide.bullets.length >= 4 || narrativeChars > 660;
 
@@ -225,7 +226,20 @@ export const PrintPdfDeckView: React.FC<{
                   <div className="grid grid-cols-3 gap-2 shrink-0">
                     {slide.metrics.map((m) => {
                       const style = printMetricAccentStyle(m.accent);
-                      return (
+                      return m.href ? (
+                        <a
+                          key={m.label}
+                          href={m.href}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className={`block rounded-xl border px-3 py-2 ${style.card}`}
+                        >
+                          <div className="text-xs font-mono text-slate-300 truncate">{m.label}</div>
+                          <div className={`text-base font-extrabold font-mono mt-0.5 truncate underline decoration-current/45 underline-offset-2 ${style.value}`}>
+                            {m.value}
+                          </div>
+                        </a>
+                      ) : (
                         <div
                           key={m.label}
                           className={`rounded-xl border px-3 py-2 ${style.card}`}

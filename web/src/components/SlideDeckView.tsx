@@ -23,7 +23,7 @@ import {
 import { SLIDES_DATA } from '../data/slidesData';
 import { DemoExecutionMode, NavView } from '../types/presentation';
 import { soundEngine } from '../utils/soundEngine';
-import { FormattedText } from './FormattedText';
+import { FormattedText, stripMarkdownLinks } from './FormattedText';
 import { SlideWidgetRenderer } from './SlideWidgetRenderer';
 import { VisualPanoramaSlideBody } from './VisualPanoramaSlideBody';
 
@@ -267,7 +267,8 @@ export const SlideDeckView: React.FC<{
   };
 
   const narrativeChars =
-    slide.keyTakeaway.length + slide.bullets.reduce((acc, b) => acc + b.length, 0);
+    stripMarkdownLinks(slide.keyTakeaway).length +
+    slide.bullets.reduce((acc, b) => acc + stripMarkdownLinks(b).length, 0);
   const isConciseSlide = narrativeChars < 530 && slide.bullets.length <= 3;
   const isDenseSlide = slide.bullets.length >= 4 || narrativeChars > 660;
 
@@ -478,19 +479,37 @@ export const SlideDeckView: React.FC<{
             <div className="space-y-2.5 pt-0.5 shrink-0">
               {slide.metrics && (
                 <div className="grid grid-cols-3 gap-2.5">
-                  {slide.metrics.map((m) => (
-                    <div
-                      key={m.label}
-                      className={`rounded-xl border px-3 py-2.5 ${metricBadgeStyle(m.accent)}`}
-                    >
-                      <div className="text-xs sm:text-[13px] xl:text-sm font-mono opacity-95 truncate">
-                        {m.label}
+                  {slide.metrics.map((m) =>
+                    m.href ? (
+                      <a
+                        key={m.label}
+                        href={m.href}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        title={`Open ${m.href}`}
+                        className={`block rounded-xl border px-3 py-2.5 transition hover:brightness-125 hover:border-white/40 ${metricBadgeStyle(m.accent)}`}
+                      >
+                        <div className="text-xs sm:text-[13px] xl:text-sm font-mono opacity-95 truncate">
+                          {m.label}
+                        </div>
+                        <div className="text-sm sm:text-[15px] xl:text-base 2xl:text-[1.05rem] font-extrabold font-mono tracking-tight leading-tight mt-0.5 underline decoration-current/45 underline-offset-2">
+                          {m.value}
+                        </div>
+                      </a>
+                    ) : (
+                      <div
+                        key={m.label}
+                        className={`rounded-xl border px-3 py-2.5 ${metricBadgeStyle(m.accent)}`}
+                      >
+                        <div className="text-xs sm:text-[13px] xl:text-sm font-mono opacity-95 truncate">
+                          {m.label}
+                        </div>
+                        <div className="text-sm sm:text-[15px] xl:text-base 2xl:text-[1.05rem] font-extrabold font-mono tracking-tight leading-tight mt-0.5">
+                          {m.value}
+                        </div>
                       </div>
-                      <div className="text-sm sm:text-[15px] xl:text-base 2xl:text-[1.05rem] font-extrabold font-mono tracking-tight leading-tight mt-0.5">
-                        {m.value}
-                      </div>
-                    </div>
-                  ))}
+                    ),
+                  )}
                 </div>
               )}
 

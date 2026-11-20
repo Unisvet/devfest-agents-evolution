@@ -61,21 +61,107 @@ export const SlideWidgetRenderer: React.FC<{
                 <Layers className="w-5 h-5 shrink-0" /> Antigravity Surfaces &amp; CLI
               </div>
               <ul className="text-sm xl:text-[15.5px] 2xl:text-base text-slate-200 space-y-2 font-mono leading-snug">
-                <li>• Antigravity 2.0 Desktop &amp; IDE</li>
-                <li>• agy plugin install google-cloud-developer</li>
-                <li>• google-antigravity Python SDK</li>
-                <li>• .agents/rules/tpu-lifecycle.md</li>
+                <li>
+                  •{' '}
+                  <a
+                    href="https://antigravity.google/docs"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="hover:text-cyan-200 underline decoration-cyan-400/45 underline-offset-2 transition-colors"
+                  >
+                    Antigravity 2.0 Desktop &amp; IDE
+                  </a>
+                </li>
+                <li>
+                  •{' '}
+                  <a
+                    href="https://github.com/google/skills/tree/main/plugins/cloud/google-cloud-developer"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="hover:text-cyan-200 underline decoration-cyan-400/45 underline-offset-2 transition-colors"
+                  >
+                    agy plugin install google-cloud-developer
+                  </a>
+                </li>
+                <li>
+                  •{' '}
+                  <a
+                    href="https://github.com/google-antigravity/antigravity-sdk-python"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="hover:text-cyan-200 underline decoration-cyan-400/45 underline-offset-2 transition-colors"
+                  >
+                    google-antigravity Python SDK
+                  </a>
+                </li>
+                <li>
+                  •{' '}
+                  <a
+                    href="https://antigravity.google/docs/rules"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="hover:text-cyan-200 underline decoration-cyan-400/45 underline-offset-2 transition-colors"
+                  >
+                    .agents/rules/tpu-lifecycle.md
+                  </a>
+                </li>
               </ul>
             </div>
             <div className="rounded-xl bg-slate-950/85 border border-emerald-500/30 p-4 flex flex-col justify-center">
-              <div className="text-base xl:text-lg font-bold text-emerald-300 mb-2 flex items-center gap-2">
+              <a
+                href="https://github.com/Google-Cloud-AI/alphaevolve-on-googlecloud/tree/main/skills"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-base xl:text-lg font-bold text-emerald-300 hover:text-emerald-200 mb-2 flex items-center gap-2 transition-colors"
+              >
                 <Code2 className="w-5 h-5 shrink-0" /> 6 Official <code className="font-mono">ae</code> Skills
-              </div>
+                <ExternalLink className="w-3.5 h-3.5 opacity-80" />
+              </a>
               <ul className="text-sm xl:text-[15.5px] 2xl:text-base text-slate-200 space-y-2 font-mono leading-snug">
-                <li>• alpha_evolve_orchestrator</li>
-                <li>• alpha_evolve_experiment_design</li>
-                <li>• runner &amp; monitor (--dashboard)</li>
-                <li>• post_experiment &amp; consultant</li>
+                <li>
+                  •{' '}
+                  <a
+                    href="https://github.com/Google-Cloud-AI/alphaevolve-on-googlecloud/tree/main/skills"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="hover:text-emerald-200 underline decoration-emerald-400/45 underline-offset-2 transition-colors"
+                  >
+                    alpha_evolve_orchestrator
+                  </a>
+                </li>
+                <li>
+                  •{' '}
+                  <a
+                    href="https://github.com/Google-Cloud-AI/alphaevolve-on-googlecloud/tree/main/skills"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="hover:text-emerald-200 underline decoration-emerald-400/45 underline-offset-2 transition-colors"
+                  >
+                    alpha_evolve_experiment_design
+                  </a>
+                </li>
+                <li>
+                  •{' '}
+                  <a
+                    href="https://github.com/Google-Cloud-AI/alphaevolve-on-googlecloud/tree/main/skills"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="hover:text-emerald-200 underline decoration-emerald-400/45 underline-offset-2 transition-colors"
+                  >
+                    runner &amp; monitor (--dashboard)
+                  </a>
+                </li>
+                <li>
+                  •{' '}
+                  <a
+                    href="https://github.com/Google-Cloud-AI/alphaevolve-on-googlecloud/tree/main/skills"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="hover:text-emerald-200 underline decoration-emerald-400/45 underline-offset-2 transition-colors"
+                  >
+                    post_experiment &amp; consultant
+                  </a>
+                </li>
               </ul>
             </div>
             <div className="col-span-2 rounded-xl bg-purple-950/25 border border-purple-500/35 p-4 flex flex-col justify-center">
@@ -83,15 +169,51 @@ export const SlideWidgetRenderer: React.FC<{
                 <Lock className="w-5 h-5 shrink-0" /> Gemini Enterprise Governance Pillars
               </div>
               <div className="grid grid-cols-4 gap-2.5 text-sm xl:text-base font-mono font-bold text-slate-100 mt-1">
-                <div className="rounded-lg bg-slate-950 p-3 border border-slate-800 text-center">1. Build (ADK)</div>
-                <div className="rounded-lg bg-slate-950 p-3 border border-slate-800 text-center">2. Scale (A2A)</div>
-                <div className="rounded-lg bg-slate-950 p-3 border border-slate-800 text-center">3. Govern (Armor)</div>
-                <div className="rounded-lg bg-slate-950 p-3 border border-slate-800 text-center">4. Evolve (AE)</div>
+                <a
+                  href="https://adk.dev/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="rounded-lg bg-slate-950 p-3 border border-slate-800 hover:border-cyan-400/60 hover:text-cyan-200 text-center transition-colors"
+                >
+                  1. Build (ADK)
+                </a>
+                <a
+                  href="https://a2a-protocol.org/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="rounded-lg bg-slate-950 p-3 border border-slate-800 hover:border-cyan-400/60 hover:text-cyan-200 text-center transition-colors"
+                >
+                  2. Scale (A2A)
+                </a>
+                <a
+                  href="https://cloud.google.com/model-armor/docs"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="rounded-lg bg-slate-950 p-3 border border-slate-800 hover:border-purple-400/60 hover:text-purple-200 text-center transition-colors"
+                >
+                  3. Govern (Armor)
+                </a>
+                <a
+                  href="https://github.com/Google-Cloud-AI/alphaevolve-on-googlecloud"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="rounded-lg bg-slate-950 p-3 border border-slate-800 hover:border-emerald-400/60 hover:text-emerald-200 text-center transition-colors"
+                >
+                  4. Evolve (AE)
+                </a>
               </div>
             </div>
           </div>
           <div className="text-sm xl:text-base font-mono text-slate-300 pt-1">
-            Installed via <code className="text-emerald-300 font-bold">ae skills install --tool Antigravity</code>
+            Installed via{' '}
+            <a
+              href="https://github.com/Google-Cloud-AI/alphaevolve-on-googlecloud/tree/main/skills"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-emerald-300 hover:text-emerald-200 font-bold underline decoration-emerald-400/50 underline-offset-2 transition-colors"
+            >
+              ae skills install --tool Antigravity
+            </a>
           </div>
         </div>
       );

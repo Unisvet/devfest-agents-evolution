@@ -103,6 +103,56 @@ export const LEARNING_RESOURCES: LearningResource[] = [
       'Build, scale, govern, and optimize production multi-agent topologies using the Agent Development Kit (ADK), Agent2Agent (A2A) protocol, and Model Armor guardrails.',
   },
   {
+    id: 'google-adk',
+    category: 'Antigravity & Agents',
+    title: 'Agent Development Kit (ADK) — Build & Orchestrate Multi-Agent Systems',
+    provider: 'Google Open Source',
+    url: 'https://adk.dev/',
+    badge: 'ADK Framework',
+    description:
+      'Code-first open-source toolkit for building, evaluating, and deploying composable multi-agent architectures with native tool calling, streaming, and Gemini integration.',
+  },
+  {
+    id: 'a2a-protocol',
+    category: 'Antigravity & Agents',
+    title: 'Agent2Agent (A2A) Protocol — Open Multi-Agent Interoperability Standard',
+    provider: 'Linux Foundation • A2A Project',
+    url: 'https://a2a-protocol.org/',
+    badge: 'Open Standard',
+    description:
+      'Open protocol enabling autonomous agents across different frameworks and vendors to discover capabilities, exchange tasks, and collaborate securely.',
+  },
+  {
+    id: 'antigravity-mcp-rules',
+    category: 'Antigravity & Agents',
+    title: 'Antigravity MCP Servers & Workspace Rules (.agents/rules/)',
+    provider: 'Google Antigravity Docs',
+    url: 'https://antigravity.google/docs/mcp',
+    badge: 'MCP & Guardrails',
+    description:
+      'Connect external Model Context Protocol (MCP) tool servers and enforce persistent workspace invariants via `.agents/rules/*.md` and terminal sandboxes.',
+  },
+  {
+    id: 'google-cloud-model-armor',
+    category: 'Antigravity & Agents',
+    title: 'Google Cloud Model Armor — Technical Documentation',
+    provider: 'Google Cloud Security',
+    url: 'https://cloud.google.com/model-armor/docs',
+    badge: 'Runtime Security',
+    description:
+      'Technical reference for prompt-injection defense, jailbreak screening, sensitive data sanitization, and runtime safety templates protecting AI models and agent pipelines.',
+  },
+  {
+    id: 'google-cloud-developer-plugin',
+    category: 'Antigravity & Agents',
+    title: 'Google Cloud Developer Plugin (`google/skills`)',
+    provider: 'GitHub • google/skills',
+    url: 'https://github.com/google/skills/tree/main/plugins/cloud/google-cloud-developer',
+    badge: 'Antigravity Plugin',
+    description:
+      'Official plugin bundle installed via `agy plugin install google-cloud-developer` — provides safe `gcloud` guardrails, IAM/ADC recipes, and live Developer Knowledge MCP grounding.',
+  },
+  {
     id: 'alphaevolve-deepmind',
     category: 'AlphaEvolve & AGI',
     title: 'AlphaEvolve: A Gemini-Powered Coding Agent for Designing Advanced Algorithms',

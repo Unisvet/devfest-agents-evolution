@@ -224,16 +224,31 @@ export const SLIDES_DATA: SlideDefinition[] = [
     title: 'Pillar 1: Google Antigravity 2.0 & Gemini Enterprise',
     subtitle: 'Unbundling Multi-Agent Reasoning Across Desktop, CLI, Plugins, Skills & Cloud',
     keyTakeaway:
-      'Antigravity 2.0 turns passive models into coordinated engineering crews equipped with plugins (`google-cloud-developer`), the 6 official `alpha_evolve_*` skills, MCP servers, and `.agents/rules/` guardrails.',
+      'Antigravity 2.0 turns passive models into coordinated engineering crews equipped with plugins ([`google-cloud-developer`](https://github.com/google/skills/tree/main/plugins/cloud/google-cloud-developer)), the 6 official [`alpha_evolve_*`](https://github.com/Google-Cloud-AI/alphaevolve-on-googlecloud/tree/main/skills) skills, [MCP](https://antigravity.google/docs/mcp) servers, and [`.agents/rules/`](https://antigravity.google/docs/rules) guardrails.',
     bullets: [
-      'Antigravity 2.0 Surfaces: Desktop Orchestrator, `agy` CLI (`agy plugin install google-cloud-developer`), `/boost`, and `google-antigravity` Python SDK.',
-      'Plug-and-Play AlphaEvolve Skills: `ae skills install --tool Antigravity` installs `orchestrator`, `experiment_design`, `runner`, `monitor`, `post_experiment` & `consultant`.',
-      'Gemini Enterprise Governance: Agent Development Kit (`ADK`), `A2A` interop, `MCP` tools, and `Model Armor` runtime shields.',
+      'Antigravity 2.0 Surfaces: [Desktop Orchestrator](https://antigravity.google/docs), [`agy`](https://antigravity.google/docs/cli/reference) CLI ([`agy plugin install google-cloud-developer`](https://github.com/google/skills/tree/main/plugins/cloud/google-cloud-developer)), [`/boost`](https://antigravity.google/docs/features), and [`google-antigravity`](https://github.com/google-antigravity/antigravity-sdk-python) Python SDK.',
+      'Plug-and-Play AlphaEvolve Skills: [`ae skills install --tool Antigravity`](https://github.com/Google-Cloud-AI/alphaevolve-on-googlecloud/tree/main/skills) installs [`orchestrator`](https://github.com/Google-Cloud-AI/alphaevolve-on-googlecloud/tree/main/skills), [`experiment_design`](https://github.com/Google-Cloud-AI/alphaevolve-on-googlecloud/tree/main/skills), [`runner`](https://github.com/Google-Cloud-AI/alphaevolve-on-googlecloud/tree/main/skills), [`monitor`](https://github.com/Google-Cloud-AI/alphaevolve-on-googlecloud/tree/main/skills), [`post_experiment`](https://github.com/Google-Cloud-AI/alphaevolve-on-googlecloud/tree/main/skills) & [`consultant`](https://github.com/Google-Cloud-AI/alphaevolve-on-googlecloud/tree/main/skills).',
+      'Gemini Enterprise Governance: Agent Development Kit ([`ADK`](https://adk.dev/)), [`A2A`](https://a2a-protocol.org/) interop, [`MCP`](https://antigravity.google/docs/mcp) tools, and [`Model Armor`](https://cloud.google.com/model-armor/docs) runtime shields.',
     ],
     metrics: [
-      { label: 'AlphaEvolve Agent Skills', value: '6 Official SKILL.md', accent: 'emerald' },
-      { label: 'Workspace Guardrails', value: '.agents/rules/*.md', accent: 'cyan' },
-      { label: 'Runtime Security', value: 'Sandbox + Model Armor', accent: 'purple' },
+      {
+        label: 'AlphaEvolve Agent Skills',
+        value: '6 Official SKILL.md',
+        accent: 'emerald',
+        href: 'https://github.com/Google-Cloud-AI/alphaevolve-on-googlecloud/tree/main/skills',
+      },
+      {
+        label: 'Workspace Guardrails',
+        value: '.agents/rules/*.md',
+        accent: 'cyan',
+        href: 'https://antigravity.google/docs/rules',
+      },
+      {
+        label: 'Runtime Security',
+        value: 'Sandbox + Model Armor',
+        accent: 'purple',
+        href: 'https://cloud.google.com/model-armor/docs',
+      },
     ],
     widget: 'antigravity-architecture',
     illustration: {
