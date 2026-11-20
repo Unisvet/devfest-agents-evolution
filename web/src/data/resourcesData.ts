@@ -157,7 +157,7 @@ export const LEARNING_RESOURCES: LearningResource[] = [
     category: 'AlphaEvolve & AGI',
     title: 'AlphaEvolve: A Gemini-Powered Coding Agent for Designing Advanced Algorithms',
     provider: 'Google DeepMind & Google Cloud',
-    url: 'https://deepmind.google/discover/blog/alphaevolve-a-gemini-powered-coding-agent-for-designing-advanced-algorithms/',
+    url: 'https://deepmind.google/blog/alphaevolve-a-gemini-powered-coding-agent-for-designing-advanced-algorithms/',
     badge: 'DeepMind Research',
     description:
       'How ensemble Gemini models + automated verifiers recovered 0.7% of Google Borg fleet compute, accelerated training kernels by 23%, and reached GA on Gemini Enterprise.',

@@ -284,18 +284,34 @@ export const SLIDES_DATA: SlideDefinition[] = [
     act: 'Act III • Algorithmic Evolution',
     timeRange: '15:00 – 18:30',
     title: 'Pillar 2: How AlphaEvolve Works on Google Cloud',
-    subtitle: 'Inside `Google-Cloud-AI/alphaevolve-on-googlecloud` & Discovery Engine API',
+    subtitle:
+      'Inside [`Google-Cloud-AI/alphaevolve-on-googlecloud`](https://github.com/Google-Cloud-AI/alphaevolve-on-googlecloud) & Discovery Engine API',
     keyTakeaway:
-      'AlphaEvolve decouples Cloud LLM Mutation (managed Discovery Engine service) from User-Controlled Evaluation (running securely inside YOUR environment with zero code lock-in).',
+      '[AlphaEvolve](https://deepmind.google/blog/alphaevolve-a-gemini-powered-coding-agent-for-designing-advanced-algorithms/) ([Google DeepMind](https://deepmind.google/)) decouples Cloud LLM Mutation (managed Discovery Engine service) from User-Controlled Evaluation (running securely inside YOUR environment with zero code lock-in).',
     bullets: [
       'Surgical `# EVOLVE-BLOCK-START` Markers: Constrain mutations to hot loops while keeping I/O signatures & test harnesses immutable.',
       'Dual-Model Mixture + MAP-Elites: `gemini-4-argon` (Cloud default) & `gemini-3.8-flash` drive high-breadth exploration; `gemini-3.1-pro-preview` synthesizes deep algorithmic leaps across islands.',
       'Actionable `-inf` Insights: Broken candidates return `-inf` PLUS `AlphaEvolveEvaluationInsight` error diagnostics so Gemini self-repairs on the next generation!',
     ],
     metrics: [
-      { label: 'Official Repo Demos', value: '6 Cloud Examples', accent: 'cyan' },
-      { label: 'Google Borg Recovered', value: '0.7% Global Fleet', accent: 'emerald' },
-      { label: 'Gemini Kernel Speedup', value: '+23% Faster', accent: 'purple' },
+      {
+        label: 'Official Repo Demos',
+        value: '6 Cloud Examples',
+        accent: 'cyan',
+        href: 'https://github.com/Google-Cloud-AI/alphaevolve-on-googlecloud',
+      },
+      {
+        label: 'Google Borg Recovered',
+        value: '0.7% Global Fleet',
+        accent: 'emerald',
+        href: 'https://deepmind.google/blog/alphaevolve-a-gemini-powered-coding-agent-for-designing-advanced-algorithms/',
+      },
+      {
+        label: 'Gemini Kernel Speedup',
+        value: '+23% Faster',
+        accent: 'purple',
+        href: 'https://deepmind.google/blog/alphaevolve-a-gemini-powered-coding-agent-for-designing-advanced-algorithms/',
+      },
     ],
     widget: 'alphaevolve-architecture',
     illustration: {

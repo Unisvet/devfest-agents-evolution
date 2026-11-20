@@ -224,16 +224,34 @@ export const SlideWidgetRenderer: React.FC<{
     case 'alphaevolve-architecture':
       return (
         <div className="flex flex-col h-full justify-between rounded-2xl bg-slate-900/75 border border-emerald-500/30 p-5 xl:p-6 gap-3">
-          <div className="flex items-center justify-between text-sm xl:text-base font-mono font-bold uppercase tracking-wider text-emerald-300">
+          <div className="flex flex-wrap items-center justify-between gap-2 text-sm xl:text-base font-mono font-bold uppercase tracking-wider text-emerald-300">
             <span>Decoupled Cloud Mutation × Local/TPU Evaluation</span>
-            <a
-              href="https://github.com/Google-Cloud-AI/alphaevolve-on-googlecloud"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-cyan-300 hover:underline inline-flex items-center gap-1.5 normal-case"
-            >
-              GitHub Repo <ExternalLink className="w-4 h-4" />
-            </a>
+            <div className="flex items-center gap-3 text-xs sm:text-sm normal-case">
+              <a
+                href="https://deepmind.google/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-purple-300 hover:underline inline-flex items-center gap-1"
+              >
+                DeepMind <ExternalLink className="w-3.5 h-3.5" />
+              </a>
+              <a
+                href="https://deepmind.google/blog/alphaevolve-a-gemini-powered-coding-agent-for-designing-advanced-algorithms/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-emerald-300 hover:underline inline-flex items-center gap-1"
+              >
+                AlphaEvolve Blog <ExternalLink className="w-3.5 h-3.5" />
+              </a>
+              <a
+                href="https://github.com/Google-Cloud-AI/alphaevolve-on-googlecloud"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-cyan-300 hover:underline inline-flex items-center gap-1"
+              >
+                GitHub Repo <ExternalLink className="w-3.5 h-3.5" />
+              </a>
+            </div>
           </div>
           <div className="flex-1 flex flex-col justify-between gap-2.5">
             {[
